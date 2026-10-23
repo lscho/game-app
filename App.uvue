@@ -1,0 +1,5 @@
+<script setup lang="js">
+onLaunch(() => {
+  console.log('Huanle Games launched')
+})
+</script>

@@ -1,0 +1,453 @@
+<template>
+  <view class="page" :style="pageStyle">
+    <view class="bg-sun"></view>
+    <view class="bg-orb orb-a"></view>
+    <view class="bg-orb orb-b"></view>
+
+    <scroll-view class="scroll">
+      <view class="content">
+        <view class="header">
+          <view class="logo-wrap">
+            <image class="logo" src="/static/img/brand-icon.png" mode="aspectFit"></image>
+          </view>
+          <view class="brand">
+            <text class="brand-name">欢乐游戏</text>
+            <text class="brand-sub">甜甜的童年，天天有游戏</text>
+          </view>
+        </view>
+
+        <view class="hero">
+          <text class="hello">嗨，小玩家</text>
+          <text class="hero-title">今天想玩什么？</text>
+          <text class="hero-note">挑一个游戏，马上出发</text>
+        </view>
+
+        <view class="section-row">
+          <text class="section-title">今日推荐</text>
+          <text class="section-count">{{ games.length }} 个游戏</text>
+        </view>
+
+        <view
+          class="game-card"
+          v-for="game in games"
+          :key="game.id"
+          @click="openGame(game)"
+        >
+          <view class="cover" :style="'background-color:' + game.coverBg + ';' + coverStyle">
+            <image class="cover-art" :src="game.cover" mode="aspectFill"></image>
+            <view class="cover-badge" v-if="game.badge">
+              <text class="cover-badge-text">{{ game.badge }}</text>
+            </view>
+          </view>
+
+          <view class="game-body">
+            <text class="game-name">{{ game.name }}</text>
+            <text class="game-desc">{{ game.desc }}</text>
+            <view class="meta-row">
+              <view
+                class="meta-chip"
+                :style="'background-color:' + chip.bg"
+                v-for="chip in game.chips"
+                :key="chip.text"
+              >
+                <text class="meta-text">{{ chip.text }}</text>
+              </view>
+            </view>
+            <view class="play-button" :style="'background-color:' + game.accent" @click.stop="openGame(game)">
+              <text class="play-text">开始游戏</text>
+              <text class="play-arrow">›</text>
+            </view>
+          </view>
+        </view>
+
+        <view class="coming">
+          <view class="coming-marks">
+            <view class="mark mark-pink"></view>
+            <view class="mark mark-mint"></view>
+            <view class="mark mark-lemon"></view>
+          </view>
+          <text class="coming-text">更多甜甜的小游戏正在准备中</text>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+</template>
+
+<script setup lang="ts">
+const info = uni.getWindowInfo()
+const safeTop = info.safeArea ? Math.max(0, info.safeArea.top) : 0
+const safeBottom = info.safeArea
+  ? Math.max(0, (info.windowHeight || info.screenHeight) - info.safeArea.bottom)
+  : 0
+const pageStyle = 'padding-top:' + (safeTop + 10) + 'px; padding-bottom:' + (safeBottom + 18) + 'px;'
+// 封面图 900x640，按卡片实际宽度等比设置高度，避免 aspectFill 裁掉角色
+const coverWidth = (info.windowWidth || 390) - 64
+const coverStyle = 'height:' + Math.round((coverWidth * 640) / 900) + 'px;'
+
+const games = [
+  {
+    id: 'orchard',
+    name: '小兔子的彩虹果园',
+    desc: '拖动小兔，接住彩虹水果',
+    route: '/pages/game/game',
+    cover: '/static/img/covers/orchard.png',
+    coverBg: '#C7EDFF',
+    accent: '#FF6F8E',
+    badge: '人气游戏',
+    chips: [
+      { text: '接水果', bg: '#DEF7F1' },
+      { text: '20 关', bg: '#FFF1C9' },
+      { text: '4-7 岁', bg: '#FFE4EB' }
+    ]
+  },
+  {
+    id: 'bubble',
+    name: '泡泡海洋',
+    desc: '戳破泡泡，找出海洋朋友',
+    route: '/pages/bubble/bubble',
+    cover: '/static/img/covers/bubble.png',
+    coverBg: '#BDEBFF',
+    accent: '#2AA5DA',
+    badge: '新游戏',
+    chips: [
+      { text: '戳泡泡', bg: '#DEF4FF' },
+      { text: '16 关', bg: '#FFF1C9' },
+      { text: '4-9 岁', bg: '#E3F8EE' }
+    ]
+  },
+  {
+    id: 'memory',
+    name: '动物翻翻乐',
+    desc: '翻一翻，找出一样的小动物',
+    route: '/pages/memory/memory',
+    cover: '/static/img/covers/memory.png',
+    coverBg: '#A9E4FF',
+    accent: '#E4718F',
+    badge: '新游戏',
+    chips: [
+      { text: '记忆配对', bg: '#FFE7F0' },
+      { text: '16 关', bg: '#FFF1C9' },
+      { text: '4-9 岁', bg: '#E9EEFF' }
+    ]
+  },
+  {
+    id: 'band',
+    name: '小小乐队',
+    desc: '看乐谱，按顺序敲乐器',
+    route: '/pages/band/band',
+    cover: '/static/img/covers/band.png',
+    coverBg: '#FFE6C2',
+    accent: '#E38A3F',
+    badge: '新游戏',
+    chips: [
+      { text: '音乐节奏', bg: '#FFF0D9' },
+      { text: '16 关', bg: '#FFE9C9' },
+      { text: '4-9 岁', bg: '#E3F8EE' }
+    ]
+  }
+]
+
+function openGame(game) {
+  uni.navigateTo({ url: game.route })
+}
+</script>
+
+<style>
+.page {
+  width: 100%;
+  height: 100%;
+  flex: 1;
+  overflow: hidden;
+  background-color: #FFF5E7;
+  background-image: linear-gradient(to bottom, #FFF9EF 0%, #FFEEDC 55%, #FFDFE9 100%);
+}
+
+.bg-sun {
+  position: absolute;
+  top: 46px;
+  right: 34px;
+  width: 118px;
+  height: 118px;
+  border-radius: 59px;
+  background-color: #FFE08A;
+  opacity: 0.45;
+}
+
+.bg-orb {
+  position: absolute;
+  border-radius: 999px;
+}
+
+.orb-a {
+  top: 190px;
+  left: -76px;
+  width: 190px;
+  height: 190px;
+  background-color: #BFEFE7;
+  opacity: 0.48;
+}
+
+.orb-b {
+  bottom: 40px;
+  right: -90px;
+  width: 220px;
+  height: 220px;
+  background-color: #FFC9D8;
+  opacity: 0.45;
+}
+
+.scroll {
+  width: 100%;
+  height: 100%;
+  flex: 1;
+}
+
+.content {
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.header {
+  flex-direction: row;
+  align-items: center;
+  padding-top: 4px;
+}
+
+.logo-wrap {
+  width: 72px;
+  height: 72px;
+  border-radius: 24px;
+  background-color: #FFFFFF;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo {
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+}
+
+.brand {
+  flex: 1;
+  margin-left: 13px;
+  justify-content: center;
+}
+
+.brand-name {
+  font-size: 27px;
+  line-height: 34px;
+  font-weight: 700;
+  color: #4F372B;
+}
+
+.brand-sub {
+  margin-top: 2px;
+  font-size: 12px;
+  line-height: 18px;
+  color: #9B7868;
+}
+
+.hero {
+  margin-top: 26px;
+}
+
+.hello {
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: 600;
+  color: #F0738C;
+}
+
+.hero-title {
+  margin-top: 4px;
+  font-size: 31px;
+  line-height: 40px;
+  font-weight: 700;
+  color: #4F372B;
+}
+
+.hero-note {
+  margin-top: 6px;
+  font-size: 13px;
+  line-height: 20px;
+  color: #9B7868;
+}
+
+.section-row {
+  margin-top: 24px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.section-title {
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 700;
+  color: #4F372B;
+}
+
+.section-count {
+  font-size: 12px;
+  line-height: 18px;
+  color: #A78976;
+}
+
+.game-card {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 32px;
+  background-color: #FFFFFF;
+  border-width: 2px;
+  border-color: #FFE2CF;
+  border-style: solid;
+  box-shadow: 0 16px 36px rgba(180, 107, 72, 0.14);
+}
+
+.cover {
+  width: 100%;
+  border-radius: 24px;
+  overflow: hidden;
+  position: relative;
+}
+
+.cover-art {
+  width: 100%;
+  height: 100%;
+}
+
+.cover-badge {
+  position: absolute;
+  top: 12px;
+  left: 14px;
+  padding-left: 11px;
+  padding-right: 11px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  border-radius: 999px;
+  background-color: #FFFFFF;
+}
+
+.cover-badge-text {
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 700;
+  color: #E96C88;
+}
+
+.play-button {
+  margin-top: 14px;
+  height: 52px;
+  border-radius: 26px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.game-body {
+  padding-left: 6px;
+  padding-right: 6px;
+  padding-top: 13px;
+  padding-bottom: 4px;
+}
+
+.game-name {
+  font-size: 21px;
+  line-height: 29px;
+  font-weight: 700;
+  color: #4F372B;
+}
+
+.game-desc {
+  margin-top: 4px;
+  font-size: 13px;
+  line-height: 20px;
+  color: #947363;
+}
+
+.meta-row {
+  margin-top: 10px;
+  flex-direction: row;
+  align-items: center;
+}
+
+.meta-chip {
+  margin-right: 8px;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  border-radius: 999px;
+}
+
+.meta-text {
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 600;
+  color: #6F574B;
+}
+
+.play-text {
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+.play-arrow {
+  margin-left: 8px;
+  font-size: 24px;
+  line-height: 24px;
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+.coming {
+  margin-top: 18px;
+  margin-bottom: 8px;
+  padding-top: 16px;
+  padding-bottom: 16px;
+  padding-left: 18px;
+  padding-right: 18px;
+  border-radius: 22px;
+  background-color: #FFFFFF;
+  border-width: 2px;
+  border-color: #FFE7D7;
+  border-style: solid;
+  flex-direction: row;
+  align-items: center;
+}
+
+.coming-marks {
+  flex-direction: row;
+  align-items: center;
+  margin-right: 10px;
+}
+
+.mark {
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+  margin-right: 4px;
+}
+
+.mark-pink {
+  background-color: #FF9FB4;
+}
+
+.mark-mint {
+  background-color: #7FE0D4;
+}
+
+.mark-lemon {
+  background-color: #FFD166;
+}
+
+.coming-text {
+  flex: 1;
+  font-size: 12px;
+  line-height: 18px;
+  color: #9B7868;
+}
+</style>

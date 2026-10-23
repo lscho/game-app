@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <application
+        android:name="io.dcloud.uniappxv.UniApplication"
+        android:allowBackup="true"
+        android:debuggable="false"
+        android:supportsRtl="true"
+        android:largeHeap="true"
+        tools:ignore="HardcodedDebugMode"
+        tools:replace="android:allowBackup">
+        <activity
+            android:name="io.dcloud.uniappxv.UniAppActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize|mcc|mnc|fontScale|keyboard|smallestScreenSize|screenLayout|uiMode"
+            android:exported="true"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.DayNight.NoActionBar"
+            android:windowSoftInputMode="adjustResize"
+            tools:replace="android:exported,android:theme,android:configChanges,android:windowSoftInputMode">
+        </activity>
+        <meta-data
+            android:name="DCLOUD_UNI_APPID"
+            android:value="__UNI__B4E2FFE" />
+    </application>
+</manifest>

@@ -1,0 +1,65 @@
+{
+  "pages": [
+    {
+      "path": "pages/index/index",
+      "style": {
+        "navigationStyle": "custom",
+        "backgroundColor": "#FFF5E7",
+        "pageOrientation": "portrait",
+        "app-plus": {
+          "bounce": "none"
+        }
+      }
+    },
+    {
+      "path": "pages/game/game",
+      "style": {
+        "navigationStyle": "custom",
+        "backgroundColor": "#9FE2FF",
+        "pageOrientation": "portrait",
+        "app-plus": {
+          "bounce": "none"
+        }
+      }
+    },
+    {
+      "path": "pages/bubble/bubble",
+      "style": {
+        "navigationStyle": "custom",
+        "backgroundColor": "#BDEBFF",
+        "pageOrientation": "portrait",
+        "app-plus": {
+          "bounce": "none"
+        }
+      }
+    },
+    {
+      "path": "pages/memory/memory",
+      "style": {
+        "navigationStyle": "custom",
+        "backgroundColor": "#A9E4FF",
+        "pageOrientation": "portrait",
+        "app-plus": {
+          "bounce": "none"
+        }
+      }
+    },
+    {
+      "path": "pages/band/band",
+      "style": {
+        "navigationStyle": "custom",
+        "backgroundColor": "#C8EEFF",
+        "pageOrientation": "portrait",
+        "app-plus": {
+          "bounce": "none"
+        }
+      }
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "欢乐游戏",
+    "navigationBarBackgroundColor": "#FFF5E7",
+    "backgroundColor": "#FFF5E7"
+  }
+}

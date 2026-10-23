@@ -1,0 +1,44 @@
+# HBuilderX / uni-app x 构建缓存与产物
+unpackage/
+build/
+.gradle/
+.kotlin/
+local.properties
+*.iml
+
+# 打包产物
+*.apk
+*.aab
+*.ipa
+*.idsig
+*.hprof
+
+# 签名证书与密码（绝不提交）
+*.jks
+*.keystore
+*.p12
+*.pem
+*.key
+*.cer
+*.csr
+keystore.properties
+storepass.txt
+
+# 环境变量与依赖
+.env
+.env.*
+!.env.example
+node_modules/
+
+# 系统与编辑器
+.DS_Store
+Thumbs.db
+__MACOSX/
+.idea/
+.vscode/
+.history/
+*.swp
+*~
+
+# 日志
+*.log

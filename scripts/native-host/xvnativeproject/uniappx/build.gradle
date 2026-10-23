@@ -1,0 +1,58 @@
+plugins {
+    alias(libs.plugins.android.library)
+    id 'io.dcloud.uts.kotlin'
+    id 'io.dcloud.uts.auto-register'
+}
+
+android {
+    namespace 'com.example.xv_native_project'
+    compileSdk {
+        version = release(36)
+    }
+
+    defaultConfig {
+        minSdk 24
+    }
+
+    buildTypes {
+        release {
+            optimization {
+                enable false
+            }
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    androidResources {
+        noCompress "uni-app-x-framework-vapor", "uni-app-x-framework-vapor-dev", "js"
+        ignoreAssetsPattern '!.svn:!.git:.*:!CVS:!thumbs.db:!picasa.ini:!*.scc:*~'
+    }
+
+    aaptOptions {
+        additionalParameters '--auto-add-overlay'
+        ignoreAssetsPattern '!.svn:!.git:.*:!CVS:!thumbs.db:!picasa.ini:!*.scc:*~'
+    }
+
+    packagingOptions {
+        pickFirst 'lib/*/libstlport_shared.so'
+        pickFirst 'lib/*/libc++_shared.so'
+
+        jniLibs {
+            useLegacyPackaging false
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(
+            dir: '../../SDK/libs',
+            include: [
+                    'app-runtime-release.aar',
+                    'uts-runtime-release.aar'
+            ]
+    )
+}

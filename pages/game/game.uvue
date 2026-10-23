@@ -1,0 +1,108 @@
+<template>
+  <view class="page" @touchstart="onTouchStart" @touchmove.stop.prevent="onTouchMove" @touchend="onTouchEnd" @touchcancel="onTouchEnd">
+    <canvas id="game" class="game"></canvas>
+  </view>
+</template>
+
+<script setup lang="ts">
+// @ts-nocheck
+import { getCurrentInstance } from 'vue'
+import { OrchardGame } from '../../game/orchard.js'
+
+let game = null
+let canvasContext = null
+let renderingContext = null
+
+const instance = getCurrentInstance()
+
+function getPoint(event) {
+  const list = event.touches && event.touches.length ? event.touches : event.changedTouches
+  if (!list || !list.length) return null
+  return { x: list[0].clientX, y: list[0].clientY }
+}
+
+function setupCanvas() {
+  uni.createCanvasContextAsync({
+    id: 'game',
+    component: instance.proxy,
+    success: (context) => {
+      canvasContext = context
+      renderingContext = context.getContext('2d')
+      const canvas = renderingContext.canvas
+      const info = uni.getWindowInfo()
+      const dpr = Math.min(info.pixelRatio || 1, 3)
+      const width = canvas.offsetWidth || info.windowWidth
+      const height = canvas.offsetHeight || info.windowHeight
+      canvas.width = Math.round(width * dpr)
+      canvas.height = Math.round(height * dpr)
+      renderingContext.scale(dpr, dpr)
+      let safeTop = 0
+      let safeBottom = 0
+      if (info.safeArea) {
+        safeTop = Math.max(0, info.safeArea.top || 0)
+        safeBottom = Math.max(0, (info.windowHeight || info.screenHeight) - (info.safeArea.bottom || 0))
+      }
+      game = new OrchardGame({
+        canvasContext,
+        ctx: renderingContext,
+        width,
+        height,
+        dpr,
+        safeTop,
+        safeBottom
+      })
+    }
+  })
+}
+
+function onTouchStart(event) {
+  const point = getPoint(event)
+  if (game && point) game.touchStart(point.x, point.y)
+}
+
+function onTouchMove(event) {
+  const point = getPoint(event)
+  if (game && point) game.touchMove(point.x, point.y)
+}
+
+function onTouchEnd(event) {
+  if (!game) return
+  const point = getPoint(event)
+  if (point) game.touchEnd(point.x, point.y)
+  else game.touchEnd(-1, -1)
+}
+
+onReady(() => {
+  setupCanvas()
+})
+
+onHide(() => {
+  if (game) game.handleHide()
+})
+
+onBackPress(() => {
+  if (game && game.handleBack()) return true
+  return false
+})
+
+onUnload(() => {
+  if (game) {
+    game.destroy()
+    game = null
+  }
+})
+</script>
+
+<style>
+.page {
+  width: 100%;
+  height: 100%;
+  flex: 1;
+  overflow: hidden;
+  background-color: #9FE2FF;
+}
+.game {
+  width: 100%;
+  height: 100%;
+}
+</style>
