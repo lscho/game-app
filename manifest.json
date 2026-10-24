@@ -2,8 +2,8 @@
 	"name": "欢乐游戏",
 	"appid": "__UNI__B4E2FFE",
 	"description": "给 4-9 岁小朋友的原生小游戏乐园",
-	"versionName": "1.2.0",
-	"versionCode": 103,
+	"versionName": "1.2.1",
+	"versionCode": 104,
 	"transformPx": false,
 	"vueVersion": "3",
 	"uni-app-x": {
