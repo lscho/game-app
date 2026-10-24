@@ -6,26 +6,27 @@ import {
 // 积木拼图：小方块自己往下掉，铺满一整行就会消失。
 // 堆得太高时彩虹魔法会帮忙清掉底下几行——没有失败，只会重新整理一下场地。
 
+// 场地比原来更高、格子更小（接近经典俄罗斯方块）；speed 按行数等比放大，保证每块积木在屏幕上的下落速度不变。
 const LEVELS = [
-  { chapter: 0, name: '第一堆积木', tip: '铺满一整行就会消失', goal: 3, cols: 6, rows: 10, speed: 0.85 },
-  { chapter: 0, name: '再来一行', tip: '左右移动小方块', goal: 3, cols: 6, rows: 10, speed: 0.95 },
-  { chapter: 0, name: '转一转', tip: '按中间的按钮转方向', goal: 4, cols: 6, rows: 10, speed: 1.0 },
-  { chapter: 0, name: '小花园', tip: '铺满 4 行', goal: 4, cols: 6, rows: 10, speed: 1.08 },
+  { chapter: 0, name: '第一堆积木', tip: '铺满一整行就会消失', goal: 3, cols: 6, rows: 14, speed: 1.19 },
+  { chapter: 0, name: '再来一行', tip: '点左边或右边移动', goal: 3, cols: 6, rows: 14, speed: 1.33 },
+  { chapter: 0, name: '转一转', tip: '点屏幕中间转方向', goal: 4, cols: 6, rows: 14, speed: 1.4 },
+  { chapter: 0, name: '小花园', tip: '按住屏幕可以加速', goal: 4, cols: 6, rows: 14, speed: 1.51 },
 
-  { chapter: 1, name: '积木果园', tip: '积木会掉得快一点', goal: 5, cols: 6, rows: 11, speed: 1.18 },
-  { chapter: 1, name: '稳稳放好', tip: '慢慢放，不着急', goal: 5, cols: 7, rows: 11, speed: 1.25 },
-  { chapter: 1, name: '七列积木', tip: '场地变宽啦', goal: 6, cols: 7, rows: 11, speed: 1.32 },
-  { chapter: 1, name: '一层一层', tip: '铺满 6 行', goal: 6, cols: 7, rows: 11, speed: 1.4 },
+  { chapter: 1, name: '积木果园', tip: '积木会掉得快一点', goal: 5, cols: 6, rows: 15, speed: 1.61 },
+  { chapter: 1, name: '稳稳放好', tip: '慢慢放，不着急', goal: 5, cols: 7, rows: 15, speed: 1.71 },
+  { chapter: 1, name: '七列积木', tip: '场地变宽啦', goal: 6, cols: 7, rows: 15, speed: 1.8 },
+  { chapter: 1, name: '一层一层', tip: '铺满 6 行', goal: 6, cols: 7, rows: 15, speed: 1.91 },
 
-  { chapter: 2, name: '晚霞积木', tip: '方块变快啦', goal: 7, cols: 7, rows: 12, speed: 1.5 },
-  { chapter: 2, name: '高高低低', tip: '看清落点再放', goal: 7, cols: 8, rows: 12, speed: 1.58 },
-  { chapter: 2, name: '积木塔', tip: '场地又高了一点', goal: 8, cols: 8, rows: 12, speed: 1.66 },
-  { chapter: 2, name: '彩虹堆', tip: '铺满 8 行', goal: 8, cols: 8, rows: 12, speed: 1.74 },
+  { chapter: 2, name: '晚霞积木', tip: '方块变快啦', goal: 7, cols: 7, rows: 16, speed: 2.0 },
+  { chapter: 2, name: '高高低低', tip: '看清落点再放', goal: 7, cols: 8, rows: 16, speed: 2.11 },
+  { chapter: 2, name: '积木塔', tip: '场地又高了一点', goal: 8, cols: 8, rows: 16, speed: 2.21 },
+  { chapter: 2, name: '彩虹堆', tip: '铺满 8 行', goal: 8, cols: 8, rows: 16, speed: 2.32 },
 
-  { chapter: 3, name: '星空积木', tip: '方块掉得真快', goal: 9, cols: 8, rows: 13, speed: 1.86 },
-  { chapter: 3, name: '小小建筑师', tip: '一步一步来', goal: 9, cols: 8, rows: 13, speed: 1.96 },
-  { chapter: 3, name: '积木大师', tip: '铺满 10 行', goal: 10, cols: 8, rows: 13, speed: 2.06 },
-  { chapter: 3, name: '积木城堡', tip: '最后一段，加油', goal: 11, cols: 8, rows: 13, speed: 2.16 },
+  { chapter: 3, name: '星空积木', tip: '方块掉得真快', goal: 9, cols: 8, rows: 17, speed: 2.43 },
+  { chapter: 3, name: '小小建筑师', tip: '一步一步来', goal: 9, cols: 8, rows: 17, speed: 2.56 },
+  { chapter: 3, name: '积木大师', tip: '铺满 10 行', goal: 10, cols: 8, rows: 17, speed: 2.69 },
+  { chapter: 3, name: '积木城堡', tip: '最后一段，加油', goal: 11, cols: 8, rows: 17, speed: 2.83 },
 ]
 
 // 每种积木一组糖果色：浅色填面、深色描边。
@@ -114,8 +115,7 @@ export class BlocksGame extends BaseGame {
     this.board = []
     this.piece = null
     this.fallAcc = 0
-    this.holdId = null
-    this.holdTimer = 0
+    this.press = null
     this.clearing = false
     this.magicAt = 0
     this.lockedCount = 0
@@ -136,11 +136,12 @@ export class BlocksGame extends BaseGame {
   }
 
   buildGeometry() {
-    const top = this.hudBottom + 62
-    const bottom = this.h - this.safeBottom - 104
+    const top = this.hudBottom + 56
+    const bottom = this.h - this.safeBottom - 26
     const areaH = bottom - top
-    const areaW = Math.min(this.w - 26, 360)
-    const cell = Math.min(areaW / this.cols, areaH / this.rows)
+    // 窄场地 + 34px 格子封顶：格子比之前小一圈，场地更高，比例接近经典俄罗斯方块。
+    const areaW = Math.min(this.w * 0.75, 330)
+    const cell = Math.min(areaW / this.cols, areaH / this.rows, 34)
     const gridW = cell * this.cols
     const gridH = cell * this.rows
     this.cell = cell
@@ -148,7 +149,6 @@ export class BlocksGame extends BaseGame {
     this.gridY = top + Math.max(0, (areaH - gridH) / 2)
     this.gridW = gridW
     this.gridH = gridH
-    this.controlY = this.h - this.safeBottom - 48
   }
 
   getObjectiveText() {
@@ -156,7 +156,7 @@ export class BlocksGame extends BaseGame {
   }
 
   getStartHint() {
-    return '铺满一整行就会消失'
+    return '点两边移动，点中间转向'
   }
 
   drawGameOverlays() {
@@ -338,46 +338,38 @@ export class BlocksGame extends BaseGame {
 
   updatePlay(dt) {
     if (!this.piece) this.spawnPiece()
-    this.handleHeldButtons(dt)
     if (!this.piece) return
-    this.fallAcc += this.fallSpeed * dt
+    // 按住屏幕超过 0.3 秒开始加速下落；短按（≤0.3 秒）在松手时按左右/中间分派。
+    const held = this.press && this.time - this.press.at > 0.3
+    this.fallAcc += this.fallSpeed * (held ? 8 : 1) * dt
     while (this.fallAcc >= 1 && this.piece) {
       this.fallAcc -= 1
       this.stepDown()
     }
   }
 
-  handleHeldButtons(dt) {
-    if (this.pressedId !== this.holdId) {
-      this.holdId = this.pressedId
-      this.holdTimer = 'fresh'
-    }
-    if (this.holdId !== 'blocks-left' && this.holdId !== 'blocks-right') return
-    const dir = this.holdId === 'blocks-left' ? -1 : 1
-    if (this.holdTimer === 'fresh') {
-      // 刚按下先挪一格，短按也能立刻看到反应；之后按 0.28 秒延迟连发。
-      this.holdTimer = 0.28
-      this.movePiece(dir)
-      return
-    }
-    this.holdTimer -= dt
-    if (this.holdTimer > 0) return
-    this.holdTimer = 0.12
-    this.movePiece(dir)
-  }
-
   updateClear(dt) {
     // 过关时撒花由基类处理，这里不需要额外推进。
   }
 
-  onTapInPlay(x, y) {
-    // 点场地里的积木不会做任何事，避免小朋友误触；只响应下方三个大按钮。
-    if (y > this.gridY + this.gridH) this.hintSeen = true
+  // 整块屏幕都是操作区：按下记时间；松手时短按按左右/中间分派，长按只算加速下落。
+  onDragStart(x, y) {
+    this.press = { x, y, at: this.time }
   }
 
-  activateExtra(id) {
-    if (this.state !== 'playing' || this.gameMode !== 'ready') return
-    if (id === 'blocks-rotate') this.rotatePiece()
+  onDragEnd() {
+    const press = this.press
+    this.press = null
+    if (!press) return
+    if (this.time - press.at > 0.3) return
+    if (press.x < this.w * 0.3) this.movePiece(-1)
+    else if (press.x > this.w * 0.7) this.movePiece(1)
+    else this.rotatePiece()
+  }
+
+  pause() {
+    this.press = null
+    return super.pause()
   }
 
   // —— 绘制 ——
@@ -474,7 +466,6 @@ export class BlocksGame extends BaseGame {
 
   drawActors() {
     this.drawBoard()
-    this.drawControls()
   }
 
   drawBoard() {
@@ -542,64 +533,6 @@ export class BlocksGame extends BaseGame {
     strokeRound(ctx, x + pad, y + pad, size - pad * 2, size - pad * 2, size * 0.22, colors[1], Math.max(1.6, size * 0.055))
     fillRound(ctx, x + pad + size * 0.13, y + pad + size * 0.11, size * 0.3, size * 0.13, size * 0.06, 'rgba(255,255,255,0.6)')
     ctx.restore()
-  }
-
-  drawControls() {
-    const y = this.controlY
-    this.drawControlButton('blocks-left', this.w * 0.2, y, 31, 'left')
-    this.drawControlButton('blocks-rotate', this.w * 0.5, y, 34, 'rotate')
-    this.drawControlButton('blocks-right', this.w * 0.8, y, 31, 'right')
-  }
-
-  drawControlButton(id, cx, cy, r, kind) {
-    const ctx = this.ctx
-    const pressed = this.pressedId === id
-    const offset = pressed ? 3 : 0
-    ctx.save()
-    ctx.beginPath()
-    ctx.fillStyle = 'rgba(156,119,82,0.22)'
-    ctx.arc(cx, cy + 5, r, 0, Math.PI * 2)
-    ctx.fill()
-    ctx.beginPath()
-    if (pressed) ctx.fillStyle = '#FFE9C4'
-    else ctx.fillStyle = 'rgba(255,250,242,0.985)'
-    ctx.arc(cx, cy + offset, r, 0, Math.PI * 2)
-    ctx.fill()
-    ctx.strokeStyle = '#FFFFFF'
-    ctx.lineWidth = 2.5
-    ctx.stroke()
-    ctx.restore()
-    if (kind === 'rotate') {
-      ctx.save()
-      ctx.strokeStyle = '#7A573B'
-      ctx.lineWidth = 3
-      ctx.lineCap = 'round'
-      ctx.beginPath()
-      ctx.arc(cx, cy + offset, r * 0.42, -Math.PI * 0.75, Math.PI * 0.65)
-      ctx.stroke()
-      ctx.fillStyle = '#7A573B'
-      ctx.beginPath()
-      ctx.moveTo(cx + r * 0.34, cy + offset - r * 0.42)
-      ctx.lineTo(cx + r * 0.58, cy + offset - r * 0.16)
-      ctx.lineTo(cx + r * 0.24, cy + offset - r * 0.06)
-      ctx.closePath()
-      ctx.fill()
-      ctx.restore()
-    } else {
-      ctx.save()
-      ctx.strokeStyle = '#7A573B'
-      ctx.lineWidth = 4
-      ctx.lineCap = 'round'
-      ctx.lineJoin = 'round'
-      const dir = kind === 'left' ? -1 : 1
-      ctx.beginPath()
-      ctx.moveTo(cx - dir * r * 0.34, cy + offset - r * 0.36)
-      ctx.lineTo(cx + dir * r * 0.3, cy + offset)
-      ctx.lineTo(cx - dir * r * 0.34, cy + offset + r * 0.36)
-      ctx.stroke()
-      ctx.restore()
-    }
-    this.buttons.push({ id, x: cx - r - 6, y: cy - r - 6, w: r * 2 + 12, h: r * 2 + 12 })
   }
 
   drawExtraOverlays() {

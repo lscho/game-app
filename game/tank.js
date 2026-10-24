@@ -7,7 +7,7 @@ import {
 // 气球碰到地面只是弹走、不扣分；漏掉的气球会自己飞回天空，永远打不完。
 
 const LEVELS = [
-  { chapter: 0, name: '第一炮', tip: '左右移动小坦克', goal: 4, rate: 1.5, speed: 0.55 },
+  { chapter: 0, name: '第一炮', tip: '点左边或右边移动', goal: 4, rate: 1.5, speed: 0.55 },
   { chapter: 0, name: '气球来啦', tip: '瞄准了再开炮', goal: 5, rate: 1.4, speed: 0.6 },
   { chapter: 0, name: '两个气球', tip: '气球会同时出现', goal: 6, rate: 1.3, speed: 0.66, max: 2 },
   { chapter: 0, name: '打准一点', tip: '打中 6 个气球', goal: 7, rate: 1.2, speed: 0.7, max: 2 },
@@ -101,8 +101,8 @@ export class TankGame extends BaseGame {
     this.balloons = []
     this.shots = []
     this.spawnTimer = 0.6
-    this.tankDir = 0
     this.tankX = 0
+    this.tankTarget = null
     this.recoil = 0
     this.lockedThisLevel = 0
   }
@@ -120,7 +120,7 @@ export class TankGame extends BaseGame {
     this.shots = []
     this.spawnTimer = 0.7
     this.tankX = this.w / 2
-    this.tankDir = 0
+    this.tankTarget = null
     this.lockedThisLevel = 0
   }
 
@@ -142,7 +142,7 @@ export class TankGame extends BaseGame {
   }
 
   getStartHint() {
-    return '按住左右，点中间开炮'
+    return '点两边移动，按中间开炮'
   }
 
   drawGameOverlays() {
@@ -208,14 +208,23 @@ export class TankGame extends BaseGame {
     if (this.recoil > 0) this.recoil = Math.max(0, this.recoil - dt * 4)
   }
 
+  // 点屏幕左半边往左挪一步，右半边往右挪一步；连续点就能走到任意位置。
+  onTapInPlay(x) {
+    const dir = x < this.w / 2 ? -1 : 1
+    const from = this.tankTarget === null ? this.tankX : this.tankTarget
+    this.tankTarget = clamp(from + dir * this.tankW * 0.85, this.tankMinX, this.tankMaxX)
+  }
+
   updateTank(dt) {
-    // 按住左右按钮持续移动；刚按下的那一帧先走一小步，短按也能看到反应。
-    const dir = this.pressedId === 'tank-left' ? -1 : this.pressedId === 'tank-right' ? 1 : 0
-    if (dir && dir !== this.tankDir) this.tankX = clamp(this.tankX + dir * this.tankW * 0.22, this.tankMinX, this.tankMaxX)
-    this.tankDir = dir
-    if (!dir) return
-    const speed = clamp(this.w * 0.85, 240, 380) * this.moveSpeed
-    this.tankX = clamp(this.tankX + dir * speed * dt, this.tankMinX, this.tankMaxX)
+    if (this.tankTarget === null) return
+    const dx = this.tankTarget - this.tankX
+    const step = clamp(this.w * 2.2, 640, 1000) * this.moveSpeed * dt
+    if (Math.abs(dx) <= step) {
+      this.tankX = this.tankTarget
+      this.tankTarget = null
+      return
+    }
+    this.tankX = clamp(this.tankX + Math.sign(dx) * step, this.tankMinX, this.tankMaxX)
   }
 
   updateShots(dt) {
@@ -568,40 +577,8 @@ export class TankGame extends BaseGame {
   }
 
   drawControls() {
-    const y = this.controlY
-    this.drawRoundButton('tank-left', this.w * 0.17, y, 30, 'left')
-    this.drawFireButton(this.w * 0.5, y, 34)
-    this.drawRoundButton('tank-right', this.w * 0.83, y, 30, 'right')
-  }
-
-  drawRoundButton(id, cx, cy, r, kind) {
-    const ctx = this.ctx
-    const pressed = this.pressedId === id
-    const offset = pressed ? 3 : 0
-    ctx.save()
-    ctx.beginPath()
-    ctx.fillStyle = 'rgba(156,119,82,0.22)'
-    ctx.arc(cx, cy + 5, r, 0, Math.PI * 2)
-    ctx.fill()
-    ctx.beginPath()
-    ctx.fillStyle = pressed ? '#FFE9C4' : 'rgba(255,250,242,0.985)'
-    ctx.arc(cx, cy + offset, r, 0, Math.PI * 2)
-    ctx.fill()
-    ctx.strokeStyle = '#FFFFFF'
-    ctx.lineWidth = 2.5
-    ctx.stroke()
-    ctx.strokeStyle = '#7A573B'
-    ctx.lineWidth = 4
-    ctx.lineCap = 'round'
-    ctx.lineJoin = 'round'
-    const dir = kind === 'left' ? -1 : 1
-    ctx.beginPath()
-    ctx.moveTo(cx - dir * r * 0.3, cy + offset - r * 0.34)
-    ctx.lineTo(cx + dir * r * 0.28, cy + offset)
-    ctx.lineTo(cx - dir * r * 0.3, cy + offset + r * 0.34)
-    ctx.stroke()
-    ctx.restore()
-    this.buttons.push({ id, x: cx - r - 6, y: cy - r - 6, w: r * 2 + 12, h: r * 2 + 12 })
+    // 只剩一个发射按钮；左右移动改为点屏幕两侧。
+    this.drawFireButton(this.w * 0.5, this.controlY, 38)
   }
 
   drawFireButton(cx, cy, r) {
