@@ -54,6 +54,39 @@
           "bounce": "none"
         }
       }
+    },
+    {
+      "path": "pages/blocks/blocks",
+      "style": {
+        "navigationStyle": "custom",
+        "backgroundColor": "#A9E4FF",
+        "pageOrientation": "portrait",
+        "app-plus": {
+          "bounce": "none"
+        }
+      }
+    },
+    {
+      "path": "pages/tank/tank",
+      "style": {
+        "navigationStyle": "custom",
+        "backgroundColor": "#A9E4FF",
+        "pageOrientation": "portrait",
+        "app-plus": {
+          "bounce": "none"
+        }
+      }
+    },
+    {
+      "path": "pages/lines/lines",
+      "style": {
+        "navigationStyle": "custom",
+        "backgroundColor": "#A9E4FF",
+        "pageOrientation": "portrait",
+        "app-plus": {
+          "bounce": "none"
+        }
+      }
     }
   ],
   "globalStyle": {

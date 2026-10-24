@@ -144,6 +144,51 @@ const games = [
       { text: '16 关', bg: '#FFE9C9' },
       { text: '4-9 岁', bg: '#E3F8EE' }
     ]
+  },
+  {
+    id: 'blocks',
+    name: '积木拼图',
+    desc: '放积木，铺满一整行',
+    route: '/pages/blocks/blocks',
+    cover: '/static/img/covers/blocks.png',
+    coverBg: '#BDEBFF',
+    accent: '#3F9FD4',
+    badge: '新游戏',
+    chips: [
+      { text: '方格拼图', bg: '#DEF4FF' },
+      { text: '16 关', bg: '#FFF1C9' },
+      { text: '4-9 岁', bg: '#E9EEFF' }
+    ]
+  },
+  {
+    id: 'tank',
+    name: '坦克打气球',
+    desc: '开小坦克，打中彩色气球',
+    route: '/pages/tank/tank',
+    cover: '/static/img/covers/tank.png',
+    coverBg: '#CDEFC0',
+    accent: '#4FA96A',
+    badge: '新游戏',
+    chips: [
+      { text: '瞄准射击', bg: '#E3F8EE' },
+      { text: '16 关', bg: '#FFF1C9' },
+      { text: '4-9 岁', bg: '#FFE7F0' }
+    ]
+  },
+  {
+    id: 'lines',
+    name: '连线小方块',
+    desc: '找一样的，把它们连起来',
+    route: '/pages/lines/lines',
+    cover: '/static/img/covers/lines.png',
+    coverBg: '#DCD2FB',
+    accent: '#8A72D8',
+    badge: '新游戏',
+    chips: [
+      { text: '连线配对', bg: '#EFE8FF' },
+      { text: '16 关', bg: '#FFF1C9' },
+      { text: '4-9 岁', bg: '#E3F8EE' }
+    ]
   }
 ]
 

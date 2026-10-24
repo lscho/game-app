@@ -1,8 +1,8 @@
-// 三款小游戏共用的引擎壳：状态机、帧循环、按钮、音频、选关、庆祝。
-// 具体玩法由 bubble.js / memory.js / band.js 继承 BaseGame 实现，
-// 约定见 docs/06-新增游戏模块规范.md。
+// 六款小游戏共用的引擎壳：状态机、帧循环、按钮、音频、选关、庆祝。
+// 具体玩法由 bubble.js / memory.js / band.js / blocks.js / tank.js / lines.js
+// 继承 BaseGame 实现，约定见 docs/06-多游戏架构与新增游戏指南.md。
 
-// 与果园共用同一份静音状态，保证大厅里四款游戏的静音互相同步。
+// 与果园共用同一份静音状态，保证大厅里七款游戏的静音互相同步。
 const STORAGE_MUTED = 'bunny-native-muted-v1'
 export const CHAPTER_COLORS = ['#D58A12', '#279C86', '#D96F4B', '#6674C9', '#338FC4']
 const CHAPTER_TINTS = ['#FFF0C4', '#DDF7EF', '#FFE4D7', '#E7E9FF', '#DFF2FF']
@@ -1654,10 +1654,18 @@ export class BaseGame {
       this.hintSeen = true
       this.hintUntil = 0
       this.onTapInPlay(x, y)
+      this.onDragStart(x, y)
     }
   }
 
   onTapInPlay() {}
+
+  // 拖拽类玩法（连线）在 onDragStart 里记录起点，之后逐帧收到 onDragMove / onDragEnd。
+  onDragStart() {}
+
+  onDragMove() {}
+
+  onDragEnd() {}
 
   touchMove(x, y) {
     if (this.pressedId) {
@@ -1665,9 +1673,11 @@ export class BaseGame {
       const dy = y - this.pressStartY
       if (Math.sqrt(dx * dx + dy * dy) > 18) this.pressedId = null
     }
+    if (this.state === 'playing' && this.gameMode === 'ready' && !this.finishing) this.onDragMove(x, y)
   }
 
   touchEnd(x, y) {
+    if (this.state === 'playing' && this.gameMode === 'ready' && !this.finishing) this.onDragEnd(x, y)
     if (!this.pressedId) return
     const id = this.pressedId
     const button = this.buttonAt(x, y)
