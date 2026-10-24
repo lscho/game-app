@@ -434,6 +434,9 @@ export class OrchardGame {
   constructor(options) {
     this.canvasContext = options.canvasContext
     this.ctx = options.ctx
+    // 背景层画布：静态场景画一次就不再重绘，主画布每帧只画会动的东西。
+    this.bgCtx = options.bgCtx || null
+    this.bgDirty = true
     this.w = options.width
     this.h = options.height
     this.dpr = options.dpr || 2
@@ -583,6 +586,7 @@ export class OrchardGame {
     const t = this.theme
     const rng = mulberry32(this.level * 7919 + 41)
     // buildDecor 在构造、beginLevel、goHome 时被调用；缓存在这里统一失效重建。
+    this.bgDirty = true
     this.clouds = Array.from({ length: t.cloudCount || 5 }, () => ({
       x: rng(), y: 0.07 + rng() * 0.27, s: 0.55 + rng() * 0.7, v: 0.005 + rng() * 0.01, a: 0.4 + rng() * 0.45
     }))
@@ -1406,7 +1410,11 @@ export class OrchardGame {
   drawScene() {
     const ctx = this.ctx
     const t = this.theme
-    this.drawSky()
+    if (this.bgCtx) {
+      this.refreshBackground()
+    } else {
+      this.drawSky()
+    }
 
     this.drawSunMoon()
 
@@ -1433,18 +1441,53 @@ export class OrchardGame {
     }
 
     const strongRainbow = this.gameMode === 'roundclear' || this.state === 'celebrating'
+    // 彩虹保留在主画布：揭晓时要用亮彩虹替换淡彩虹，放进静态层会出现两层叠在一起。
     this.drawRainbow(strongRainbow ? 0.96 : t.rainbowAlpha, strongRainbow ? this.rainbowReveal : 1)
 
     this.drawClouds()
-    // Path2D 缓存不可用（旧版基座、Web 预览）时退回逐帧绘制，画面不变，只是慢一些。
-    if (!this.scenery || !this.drawSceneryCache()) {
-      this.scenery = null
+    if (!this.bgCtx) {
+      // Path2D 缓存不可用（旧版基座、Web 预览）时退回逐帧绘制，画面不变，只是慢一些。
+      if (!this.scenery || !this.drawSceneryCache()) {
+        this.scenery = null
+        this.drawHills()
+        this.drawTrees()
+        this.drawGround()
+        this.drawGroundDecor()
+      }
+    }
+    this.drawAmbient()
+  }
+
+  // 静态层（天空、山、树、地面、草花）在独立画布上只画一次；
+  // buildDecor() 在构造、beginLevel、goHome 时把它标记为脏，下一帧重绘。
+  // 这里刻意不用 Path2D / 渐变缓存：它们绑定主上下文，跨画布复用行为不可靠；
+  // 只画一次的路径不需要优化命令数。
+  refreshBackground() {
+    if (!this.bgDirty) return
+    this.bgDirty = false
+    const mainCtx = this.ctx
+    this.ctx = this.bgCtx
+    try {
+      const ctx = this.ctx
+      const t = this.theme
+      ctx.clearRect(0, 0, this.w, this.h)
+      const sky = ctx.createLinearGradient(0, 0, 0, this.groundY + 20)
+      sky.addColorStop(0, t.skyTop)
+      sky.addColorStop(0.62, t.skyMid)
+      sky.addColorStop(1, t.skyBottom)
+      ctx.fillStyle = sky
+      ctx.fillRect(0, 0, this.w, this.h)
       this.drawHills()
       this.drawTrees()
       this.drawGround()
       this.drawGroundDecor()
+    } catch (error) {
+      // 背景画布不可用时整体退回主画布逐帧绘制。
+      this.bgCtx = null
+      if (typeof console !== 'undefined') console.error('Background draw error', error)
+    } finally {
+      this.ctx = mainCtx
     }
-    this.drawAmbient()
   }
 
   drawSky() {
@@ -1462,6 +1505,7 @@ export class OrchardGame {
   }
 
   createPath() {
+    // Path2D 只在主上下文上创建，配合 drawSceneryCache() 使用。
     if (!this.canvasContext || typeof this.canvasContext.createPath2D !== 'function') return null
     return this.canvasContext.createPath2D()
   }
