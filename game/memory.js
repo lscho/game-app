@@ -265,7 +265,10 @@ export class MemoryGame extends BaseGame {
       this.wrongPair = null
     }
     if (this.cards.length && this.matchedPairs >= this.maxPairs) {
-      this.finishRound(0.5)
+      // finishing 期间引擎不再调用 updatePlay()，翻转动画会停住。
+      // 所以等最后一张牌也翻正再收尾，否则它停在半翻的背面。
+      const settled = this.cards.every((card) => card.flip > 0.99)
+      if (settled) this.finishRound(0.5)
     }
   }
 
